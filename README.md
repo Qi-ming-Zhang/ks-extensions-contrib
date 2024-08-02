@@ -1,1 +1,1 @@
-# -ks-extensions-contrib
+# ks-extensions-contrib
