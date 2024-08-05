@@ -1,0 +1,12 @@
+{
+  "name": "pod-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "pod analyze",
+  "homepage": "",
+  "author": "QimingZhang",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ]
+}
