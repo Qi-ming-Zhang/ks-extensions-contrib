@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 
 interface CardProps {
@@ -29,52 +29,73 @@ const Card: React.FC<CardProps> = ({ title, count, description, href }) => (
     </div>
 );
 
-const podStatuses = [
-    { name: 'Running', count: 24, description: 'Pods that are currently in a running state.', href: '/pod-analyzer/running' },
-    { name: 'Pending', count: 3, description: 'Pods waiting to be scheduled or have unmet dependencies.', href: '/pod-analyzer/pending' },
-    { name: 'Failed', count: 1, description: 'Pods that have failed to complete successfully.', href: '/pod-analyzer/failed' }
-];
+const CardContainer = () => {
+    const [podStatuses, setPodStatuses] = useState<CardProps[]>([]);
 
-const CardContainer = () => (
-    <div className="card-container">
-        <div className="card-header">
-            <div>Pod Status</div>
-            <button
-                // onClick={() => mutate('http://<kubesphere-api-url>/api/v1/pods')}
-                className="reload-button"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
+    useEffect(() => {
+        const fetchPodStatuses = async () => {
+            try {
+                const response = await fetch('/api/v1/pods');
+                const data = await response.json();
+
+                const runningCount = data.items.filter((pod: any) => pod.status.phase === 'Running').length;
+                const pendingCount = data.items.filter((pod: any) => pod.status.phase === 'Pending').length;
+                const failedCount = data.items.filter((pod: any) => pod.status.phase === 'Failed').length;
+
+                setPodStatuses([
+                    { title: 'Running', count: runningCount, description: 'Pods that are currently in a running state.', href: '/pod-analyzer/running' },
+                    { title: 'Pending', count: pendingCount, description: 'Pods waiting to be scheduled or have unmet dependencies.', href: '/pod-analyzer/pending' },
+                    { title: 'Failed', count: failedCount, description: 'Pods that have failed to complete successfully.', href: '/pod-analyzer/failed' },
+                ]);
+            } catch (error) {
+                console.error('Failed to fetch pod statuses:', error);
+            }
+        };
+
+        fetchPodStatuses();
+    }, []);
+
+    return (
+        <div className="card-container">
+            <div className="card-header">
+                <div>Pod Status</div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="reload-button"
                 >
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
-                    <path d="M21 3v5h-5"></path>
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
-                    <path d="M8 16H3v5"></path>
-                </svg>
-            </button>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="w-5 h-5"
+                    >
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                        <path d="M21 3v5h-5"></path>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                        <path d="M8 16H3v5"></path>
+                    </svg>
+                </button>
+            </div>
+            <div className="cards">
+                {podStatuses.map((status) => (
+                    <Card 
+                        key={status.title} 
+                        title={status.title} 
+                        count={status.count} 
+                        description={status.description} 
+                        href={status.href} 
+                    />
+                ))}
+            </div>
         </div>
-        <div className="cards">
-            {podStatuses.map((status) => (
-                <Card 
-                    key={status.name} 
-                    title={status.name} 
-                    count={status.count} 
-                    description={status.description} 
-                    href={status.href} 
-                />
-            ))}
-        </div>
-    </div>
-);
+    );
+};
 
 const App = () => (
     <html lang="en">
@@ -285,5 +306,3 @@ const App = () => (
 );
 
 export default App;
-
-
