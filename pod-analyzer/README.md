@@ -19,9 +19,9 @@ The second PR, submitted on 0828, primarily implements automatic retrieval of po
     - Use useState to manage the state of podStatuses.
     - Use useEffect to call the API and fetch data when the component loads.
     
-    - API Calls
-      - Use fetch to get pod data from /api/v1/pods.
-      - Calculate the number of different statuses based on the pod status.
+  - API Calls
+    - Use fetch to get pod data from /api/v1/pods.
+    - Calculate the number of different statuses based on the pod status.
     
 
   - Auto Refresh
@@ -34,8 +34,8 @@ The second PR, submitted on 0828, primarily implements automatic retrieval of po
 
   - API Data Handling
     - Get the node name from pod.spec.nodeName.
-      - Get the pod IP address from pod.status.podIP.
-      - Get the update time from pod.metadata.creationTimestamp.
+    - Get the pod IP address from pod.status.podIP.
+    - Get the update time from pod.metadata.creationTimestamp.
 
 the effect after deploying the KubeSphere plugin is as follows:
 
