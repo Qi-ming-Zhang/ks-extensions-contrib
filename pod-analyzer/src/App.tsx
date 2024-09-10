@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
+import { PodProvider, usePodContext } from './PodContext';
 
 interface CardProps {
     title: string;
@@ -30,30 +31,7 @@ const Card: React.FC<CardProps> = ({ title, count, description, href }) => (
 );
 
 const CardContainer = () => {
-    const [podStatuses, setPodStatuses] = useState<CardProps[]>([]);
-
-    useEffect(() => {
-        const fetchPodStatuses = async () => {
-            try {
-                const response = await fetch('/api/v1/pods');
-                const data = await response.json();
-
-                const runningCount = data.items.filter((pod: any) => pod.status.phase === 'Running').length;
-                const pendingCount = data.items.filter((pod: any) => pod.status.phase === 'Pending').length;
-                const failedCount = data.items.filter((pod: any) => pod.status.phase === 'Failed').length;
-
-                setPodStatuses([
-                    { title: 'Running', count: runningCount, description: 'Pods that are currently in a running state.', href: '/pod-analyzer/running' },
-                    { title: 'Pending', count: pendingCount, description: 'Pods waiting to be scheduled or have unmet dependencies.', href: '/pod-analyzer/pending' },
-                    { title: 'Failed', count: failedCount, description: 'Pods that have failed to complete successfully.', href: '/pod-analyzer/failed' },
-                ]);
-            } catch (error) {
-                console.error('Failed to fetch pod statuses:', error);
-            }
-        };
-
-        fetchPodStatuses();
-    }, []);
+    const { podStatuses } = usePodContext();
 
     return (
         <div className="card-container">
@@ -98,211 +76,213 @@ const CardContainer = () => {
 };
 
 const App = () => (
-    <html lang="en">
-        <head>
-            <title>Pod Status Analyzer</title>
-            <meta name="description" content="Pod Status" />
-            <link rel="stylesheet" href="https://fonts.proxy.ustclug.org/css2?family=Inter:wght@400;700&display=swap" />
-            <style>
-                {`
-                    :root {
-                        --foreground-rgb: 0, 0, 0;
-                        --background-start-rgb: 224, 225, 230;
-                        --background-end-rgb: 255, 255, 255;
-                    }
-
-                    @media (prefers-color-scheme: dark) {
+    <PodProvider>
+        <html lang="zh">
+            <head>
+                <title>Pod Status Analyzer</title>
+                <meta name="description" content="Pod Status" />
+                <link rel="stylesheet" href="https://fonts.proxy.ustclug.org/css2?family=Inter:wght@400;700&display=swap" />
+                <style>
+                    {`
                         :root {
-                            --foreground-rgb: 255, 255, 255;
-                            --background-start-rgb: 0, 0, 0;
-                            --background-end-rgb: 0, 0, 0;
+                            --foreground-rgb: 0, 0, 0;
+                            --background-start-rgb: 224, 225, 230;
+                            --background-end-rgb: 255, 255, 255;
                         }
-                    }
 
-                    body {
-                        color: rgb(var(--foreground-rgb));
-                        background: rgb(var(--background-start-rgb));
-                        font-family: 'Inter', sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        display: flex;
-                        flex-direction: column;
-                        min-height: 100vh;
-                        align-items: center;
-                        justify-content: space-between;
-                        padding: 24px;
-                    }
+                        @media (prefers-color-scheme: dark) {
+                            :root {
+                                --foreground-rgb: 255, 255, 255;
+                                --background-start-rgb: 0, 0, 0;
+                                --background-end-rgb: 0, 0, 0;
+                            }
+                        }
 
-                    .main {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: space-between;
-                        width: 100%;
-                        max-width: 1200px;
-                    }
+                        body {
+                            color: rgb(var(--foreground-rgb));
+                            background: rgb(var(--background-start-rgb));
+                            font-family: 'Inter', sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            display: flex;
+                            flex-direction: column;
+                            min-height: 100vh;
+                            align-items: center;
+                            justify-content: space-between;
+                            padding: 24px;
+                        }
 
-                    .header {
-                        text-align: center;
-                        margin-top: 12px;
-                        margin-bottom: 80px;
-                    }
+                        .main {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: space-between;
+                            width: 100%;
+                            max-width: 1200px;
+                        }
 
-                    .header h1 {
-                        font-size: 4.8rem;
-                        font-weight: bold;
-                    }
+                        .header {
+                            text-align: center;
+                            margin-top: 12px;
+                            margin-bottom: 80px;
+                        }
 
-                    .footer {
-                        position: fixed;
-                        bottom: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 48px;
-                        display: flex;
-                        align-items: end;
-                        justify-content: center;
-                        background: linear-gradient(to top, white, transparent);
-                    }
+                        .header h1 {
+                            font-size: 4.8rem;
+                            font-weight: bold;
+                        }
 
-                    @media (prefers-color-scheme: dark) {
                         .footer {
-                            background: linear-gradient(to top, black, transparent);
+                            position: fixed;
+                            bottom: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 48px;
+                            display: flex;
+                            align-items: end;
+                            justify-content: center;
+                            background: linear-gradient(to top, white, transparent);
                         }
-                    }
 
-                    .footer div {
-                        pointer-events: none;
-                        display: flex;
-                        align-items: center;
-                        gap: 2px;
-                        padding: 8px;
-                    }
+                        @media (prefers-color-scheme: dark) {
+                            .footer {
+                                background: linear-gradient(to top, black, transparent);
+                            }
+                        }
 
-                    .content {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        width: 100%;
-                    }
+                        .footer div {
+                            pointer-events: none;
+                            display: flex;
+                            align-items: center;
+                            gap: 2px;
+                            padding: 8px;
+                        }
 
-                    .card-container {
-                        background-color: rgb(227, 233, 233);
-                        border-radius: 1rem; 
-                        padding: 16px;
-                        width: 100%;
-                        max-width: 1200px;
-                        margin-bottom: 24px; 
-                    }
+                        .content {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            width: 100%;
+                        }
 
-                    .card-header {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        margin-bottom: 16px;
-                    }
+                        .card-container {
+                            background-color: rgb(227, 233, 233);
+                            border-radius: 1rem; 
+                            padding: 16px;
+                            width: 100%;
+                            max-width: 1200px;
+                            margin-bottom: 24px; 
+                        }
 
-                    .card-header div {
-                        font-weight: bold;
-                        font-size: 1.5rem;
-                    }
+                        .card-header {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            margin-bottom: 16px;
+                        }
 
-                    .cards {
-                        display: grid;
-                        grid-template-columns: 1fr;
-                        gap: 20px;
-                        text-align: center;
-                    }
+                        .card-header div {
+                            font-weight: bold;
+                            font-size: 1.5rem;
+                        }
 
-                    @media (min-width: 1024px) {
                         .cards {
-                            grid-template-columns: repeat(3, 1fr);
-                            text-align: left;
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 20px;
+                            text-align: center;
                         }
-                    }
 
-                    .card {
-                        background-color: white;
-                        border-radius: 1rem; 
-                        border: 1px solid transparent;
-                        padding: 20px;
-                        transition: all 0.2s;
-                    }
+                        @media (min-width: 1024px) {
+                            .cards {
+                                grid-template-columns: repeat(3, 1fr);
+                                text-align: left;
+                            }
+                        }
 
-                    .card:hover {
-                        border-color: #d1d5db;
-                        background-color: #f3f4f6;
-                    }
+                        .card {
+                            background-color: white;
+                            border-radius: 1rem; 
+                            border: 1px solid transparent;
+                            padding: 20px;
+                            transition: all 0.2s;
+                        }
 
-                    @media (prefers-color-scheme: dark) {
                         .card:hover {
-                            border-color: #374151;
-                            background-color: rgba(31, 41, 55, 0.3);
+                            border-color: #d1d5db;
+                            background-color: #f3f4f6;
                         }
-                    }
 
-                    .card h2 {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        font-size: 2rem;
-                        font-weight: 600;
-                        margin-bottom: 12px;
-                    }
+                        @media (prefers-color-scheme: dark) {
+                            .card:hover {
+                                border-color: #374151;
+                                background-color: rgba(31, 41, 55, 0.3);
+                            }
+                        }
 
-                    .card p {
-                        margin: 0;
-                        max-width: 50ch;
-                        font-size: 1rem;
-                        opacity: 0.5;
-                    }
+                        .card h2 {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 600;
+                            margin-bottom: 12px;
+                        }
 
-                    .card a {
-                        display: block;
-                        margin-top: 10px;
-                        font-size: 1rem;
-                        color: #1d4ed8;
-                        text-decoration: none;
-                    }
+                        .card p {
+                            margin: 0;
+                            max-width: 50ch;
+                            font-size: 1rem;
+                            opacity: 0.5;
+                        }
 
-                    .card a:hover {
-                        text-decoration: underline;
-                    }
+                        .card a {
+                            display: block;
+                            margin-top: 10px;
+                            font-size: 1rem;
+                            color: #1d4ed8;
+                            text-decoration: none;
+                        }
 
-                    .reload-button {
-                        background: none;
-                        border: none;
-                        padding: 0;
-                        cursor: pointer;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
+                        .card a:hover {
+                            text-decoration: underline;
+                        }
 
-                    .reload-button:focus {
-                        outline: none;
-                    }
+                        .reload-button {
+                            background: none;
+                            border: none;
+                            padding: 0;
+                            cursor: pointer;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
 
-                    .reload-button svg {
-                        transition: transform 0.2s;
-                    }
+                        .reload-button:focus {
+                            outline: none;
+                        }
 
-                    .reload-button:hover svg {
-                        transform: rotate(90deg);
-                    }
-                `}
-            </style>
-        </head>
-        <body>
-            <main className="main">
-                <Header />
-                <CardContainer />
-                <Outlet />
-                <Footer />
-            </main>
-        </body>
-    </html>
+                        .reload-button svg {
+                            transition: transform 0.2s;
+                        }
+
+                        .reload-button:hover svg {
+                            transform: rotate(90deg);
+                        }
+                    `}
+                </style>
+            </head>
+            <body>
+                <main className="main">
+                    <Header />
+                    <CardContainer />
+                    <Outlet />
+                    <Footer />
+                </main>
+            </body>
+        </html>
+    </PodProvider>
 );
 
 export default App;
