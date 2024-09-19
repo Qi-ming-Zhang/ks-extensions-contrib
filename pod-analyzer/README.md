@@ -1,55 +1,110 @@
-# **pod-analyzer**
+# Pod Status Analysis Tool
 
-With the widespread adoption of Kubernetes clusters, real-time monitoring and in-depth analysis of Pod statuses have become particularly important. As a comprehensive container management platform, KubeSphere needs to provide users with more intuitive and efficient tools to observe and analyze container statuses. Currently, KubeSphere lacks an integrated and user-friendly Pod status analysis tool, which limits users' deep understanding of cluster statuses and their ability to respond quickly.
+## ![image1](.\image\image1.png)
 
-This project plans to develop a lightweight analysis tool based on LangChain.js and Ollama to analyze Kubernetes Pod statuses and integrate it into KubeSphere's container status observation page, achieving seamless user experience and efficient Pod status analysis.
+## Project Overview
 
-## The initial PR
+Welcome to the Pod Status Analysis Tool project! This project aims to develop a lightweight analysis extension component based on LangChainand Ollama, enabling seamless Pod status monitoring and analysis within KubeSphere cloud. 
 
-The initial PR, dated 0805, will be a basic static page, and the effect after deploying the KubeSphere plugin is as follows:
+## Features
 
-![Photo1](./image/photo1.png)
+- **Real-time Data Retrieval and Analysis**: real-time monitoring and data analysis of Pod status.
+- **Seamless Integration**: Integrate the analysis tool into KubeSphere's existing observation pages for a consistent user experience.
+- **Intuitive Frontend Interface**: Designed with React and LangChain for user-friendly interaction.
 
-## The second PR
+|        Running Status         |        Pending Status         |
+| :---------------------------: | :---------------------------: |
+| ![image2](.\image\image2.png) | ![image4](.\image\image4.png) |
+| ![image3](.\image\image3.png) | ![image5](.\image\image5.png) |
 
-The second PR, submitted on 0828, primarily implements automatic retrieval of pod information through the KubeSphere API, specifically including:
+## Quick Start
 
-- Main Page
-  - Using useState and useEffect
-    - Use useState to manage the state of podStatuses.
-    - Use useEffect to call the API and fetch data when the component loads.
-    
-  - API Calls
-    - Use fetch to get pod data from /api/v1/pods.
-    - Calculate the number of different statuses based on the pod status.
-    
-  - Auto Refresh
-    - Add a button to refresh the data by reloading the page with window.location.reload().
+- **Install the Kubesphere extension component environment**
 
+  **1、Set up a Kubernetes cluster**
 
-- Information Details Page
-  - Interface Updates
-    - Update the Pod interface to include nodeName, podIP, and updateTime.
+  ```
+  export KKZONE=cn
+  curl -sfL https://get-kk.kubesphere.io | sh -
+  ./kk create cluster --with-local-storage  --with-kubernetes v1.25.3 --container-manager containerd  -y
+  curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  ```
 
-  - API Data Handling
-    - Get the node name from pod.spec.nodeName.
-    - Get the pod IP address from pod.status.podIP.
-    - Get the update time from pod.metadata.creationTimestamp.
+  **2、Install the KubeSphere Luban Helm Chart**
 
-the effect after deploying the KubeSphere plugin is as follows:
+  ```
+  helm upgrade --install -n kubesphere-system --create-namespace ks-core  https://charts.kubesphere.io/main/ks-core-1.1.0.tgz --set apiserver.nodePort=30881 --debug --wait
+  ```
 
-![Photo3](./image/photo5.png)
+  **3、Install the tools required for extensions**
 
-## The third PR
+  ```
+  curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+  npm install --global yarn
+  ```
 
-The third PR, submitted on 0910, primarily focuses on enabling interaction with language models via Langchain to deliver intelligent analysis results. It also addresses issues present in the previous PR.
+- **Set up the runtime environment for LLM**
 
-- Use the `Ollama` library to call the local large language model (Qwen2:7b) for analysis, send prompts containing Pod information, receive the analysis results, and display the results in Markdown format.
-- This PR resolves issues from the previous PR. To prevent multiple loads of the same data on a single page, the project utilizes React's Context to manage shared state. This approach allows multiple components to access and update the same data without the need for repeated requests.
+  **1、Install Ollama**
 
+  ```
+  pip install modelscope
+  modelscope download --model=modelscope/ollama-linux --local_dir ./ollama-linux --revision v0.3.10
+  cd ollama-linux
+  sudo chmod 777 ./ollama-modelscope-install.sh
+  ./ollama-modelscope-install.sh
+  ```
 
-![Photo3](./image/photo6.png)
+  **2、download the Qwen2:7b mode**
 
-![Photo3](./image/photo7.png)
+  ```
+  ollama pull qwen2:7b
+  ```
 
-![Photo3](./image/video1.gif)
+- **Create and deploy this project**
+
+  **1、Initialize extension component**
+
+  ```
+  mkdir -p ~/kubesphere-extensions
+  cd ~/kubesphere-extensions
+  yarn add global create-ks-project
+  yarn create ks-project ks-console
+  cd ks-console
+  yarn create:ext
+  
+  Extension Name pod-analyzer
+  Display Name pod-analyzer
+  Description pod analyzer
+  Author demo
+  Language TypeScript
+  Create extension [pod-analyzer]? Yes
+  ```
+
+  **2、Clone this repository and add or replace the files under ks-console/extensions/pod-analyzer/src**
+
+  **3、Install the dependencies required for this project**
+
+  ```
+  yarn add @langchain/community -W
+  yarn add react-markdown -W
+  ```
+
+  **4、Modify the configuration file**
+
+  Modify the ks-console/configs/config.yaml according to the actual situation.
+
+  **5、Run the extension component and view it in the browser**
+
+  ```
+  yarn dev
+  ```
+
+  Open your browser and visit `http://localhost:8000`.
+
+## Contact Us
+
+- For any questions or suggestions, please reach out via the issues page.
+
+- Thank you for your interest and support in the Pod Status Analysis Tool project!
